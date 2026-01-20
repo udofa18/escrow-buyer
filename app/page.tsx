@@ -9,6 +9,7 @@ import { Product } from '@/types';
 import Button from '@/components/Button';
 import { handleApiError } from '@/lib/error-handler';
 import { useCart } from '@/hooks/useCart';
+import LogoOrbitLoader from "@/components/Loader";
 
 export default function StoreFront() {
   const router = useRouter();
@@ -45,9 +46,8 @@ export default function StoreFront() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
+      <LogoOrbitLoader showBackground />
+
     );
   }
 
@@ -70,8 +70,10 @@ export default function StoreFront() {
     setSearchQuery('');
   };
 
+
   return (
     <div className="min-h-screen bg-white z-10">
+
       {/* Header Banner */}
       <div className=" text-black p-6">
         <div className="max-w-7xl mx-auto">

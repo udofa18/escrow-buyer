@@ -53,3 +53,14 @@ body {
 .animate-pulse-dot {
   animation: pulse 1.5s ease-in-out infinite;
 }
+
+@keyframes orbitPulse {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}

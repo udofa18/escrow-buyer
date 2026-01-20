@@ -10,6 +10,7 @@ import Button from '@/components/Button';
 import { handleApiError } from '@/lib/error-handler';
 import { useCart } from '@/hooks/useCart';
 import { RiTruckLine } from "react-icons/ri";
+import LogoOrbitLoader from "@/components/Loader";
 export default function ProductPage() {
   const router = useRouter();
   const params = useParams();
@@ -56,9 +57,7 @@ export default function ProductPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
+      <LogoOrbitLoader showBackground />
     );
   }
 
