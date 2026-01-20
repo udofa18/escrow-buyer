@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Escrow Buyer - Product Store
+
+A modern e-commerce product store built with Next.js, TypeScript, and Tailwind CSS.
+
+## Features
+
+- 🏪 Store front with product listings
+- 📦 Product detail pages
+- 🛒 Shopping cart functionality
+- 💳 Checkout flow (contact info & review)
+- 🎟️ Discount code system
+- 💰 Payment transfer screen
+- ⏳ Payment processing screen
+- 🎨 Reusable components with consistent styling
+- 🔄 Global error handling
+- 📡 RESTful API routes
 
 ## Getting Started
 
-First, run the development server:
+### Installation
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Install react-icons (if not already installed):
+```bash
+npm install react-icons
+```
+
+### Development
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+escrow-buyer/
+├── app/
+│   ├── api/              # API routes
+│   │   ├── products/     # Product endpoints
+│   │   ├── cart/         # Cart endpoints
+│   │   ├── discount/     # Discount code validation
+│   │   ├── orders/       # Order management
+│   │   └── payment/      # Payment processing
+│   ├── checkout/         # Checkout pages
+│   │   ├── contact/      # Contact information
+│   │   └── review/       # Order review
+│   ├── product/          # Product detail pages
+│   ├── cart/             # Shopping cart
+│   ├── transfer/         # Payment transfer screen
+│   ├── processing/       # Payment processing screen
+│   └── page.tsx          # Store front (homepage)
+├── components/           # Reusable components
+│   └── Button.tsx        # Button component
+├── lib/                  # Utilities
+│   ├── api-client.ts     # API client with fetch
+│   ├── api-store.ts      # Shared API state
+│   └── error-handler.tsx # Global error handling
+├── types/                # TypeScript types
+│   └── index.ts          # Type definitions
+└── data/                 # Dummy data
+    └── products.ts       # Product data
+```
 
-## Learn More
+## API Endpoints
 
-To learn more about Next.js, take a look at the following resources:
+### Products
+- `GET /api/products` - Get all products
+- `GET /api/products/[id]` - Get product by ID
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Cart
+- `GET /api/cart` - Get cart items
+- `POST /api/cart` - Add item to cart
+- `PUT /api/cart/[productId]` - Update cart item quantity
+- `DELETE /api/cart/[productId]` - Remove item from cart
+- `DELETE /api/cart` - Clear cart
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Discount
+- `GET /api/discount/[code]` - Validate discount code
 
-## Deploy on Vercel
+### Orders
+- `POST /api/orders` - Create order
+- `GET /api/orders/[id]` - Get order by ID
+- `PUT /api/orders/[id]/status` - Update order status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Payment
+- `GET /api/payment/account/[orderId]` - Get payment account details
+- `POST /api/payment/confirm/[orderId]` - Confirm payment
+- `POST /api/payment/cancel/[orderId]` - Cancel payment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Discount Codes
+
+Available discount codes (for testing):
+- `SAVE10` - 10% off
+- `WELCOME20` - 20% off
+- `NOIR15` - 15% off
+
+## Styling
+
+- Primary color: `#5D0C97` (purple)
+- Built with Tailwind CSS
+- Responsive design
+- Uses react-icons for icons
+
+## Notes
+
+- The API uses in-memory storage for development. In production, replace with a database.
+- Product images should be placed in the `/public/products/` directory.
+- The store uses sessionStorage to pass data between checkout steps.
