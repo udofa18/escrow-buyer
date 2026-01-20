@@ -32,14 +32,36 @@ export default function CheckoutReviewPage() {
     }, []);
 
     const loadContactInfo = () => {
-        const storedContactInfo = sessionStorage.getItem('contactInfo');
-        if (storedContactInfo) {
-            setContactInfo(JSON.parse(storedContactInfo));
-        } else {
+        try {
+            // Check if sessionStorage is available (handles SSR and private browsing)
+            if (typeof window === 'undefined' || !window.sessionStorage) {
+                console.warn('sessionStorage is not available');
+                router.push('/checkout/contact');
+                setLoading(false);
+                return;
+            }
+
+            const storedContactInfo = sessionStorage.getItem('contactInfo');
+            if (storedContactInfo) {
+                try {
+                    const parsed = JSON.parse(storedContactInfo);
+                    setContactInfo(parsed);
+                } catch (parseError) {
+                    console.error('Failed to parse contact info from sessionStorage:', parseError);
+                    // Clear corrupted data
+                    sessionStorage.removeItem('contactInfo');
+                    router.push('/checkout/contact');
+                }
+            } else {
+                router.push('/checkout/contact');
+                return;
+            }
+        } catch (error) {
+            console.error('Error loading contact info:', error);
             router.push('/checkout/contact');
-            return;
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleApplyDiscount = async () => {
@@ -76,14 +98,23 @@ export default function CheckoutReviewPage() {
                 cartItems: cart.length 
             });
             const order = await orderApi.create(contactInfo, appliedDiscount?.code, cart);
-            // Store full order data in sessionStorage as backup
-            sessionStorage.setItem('orderId', order.id);
-            sessionStorage.setItem('orderData', JSON.stringify(order));
+            
+            // Store full order data in sessionStorage as backup (with error handling)
+            try {
+                if (typeof window !== 'undefined' && window.sessionStorage) {
+                    sessionStorage.setItem('orderId', order.id);
+                    sessionStorage.setItem('orderData', JSON.stringify(order));
+                }
+            } catch (storageError) {
+                console.warn('Failed to save order to sessionStorage:', storageError);
+                // Continue anyway - the order was created successfully
+            }
+            
             router.push(`/transfer?orderId=${order.id}`);
         } catch (error) {
             const errorMessage = handleApiError(error);
             console.error('Failed to create order:', error);
-            alert(errorMessage);
+            alert(errorMessage || 'Failed to create order. Please try again.');
         } finally {
             setCreatingOrder(false);
         }
@@ -97,8 +128,30 @@ export default function CheckoutReviewPage() {
         );
     }
 
-    if (!contactInfo || cart.length === 0) {
-        return null;
+    if (!contactInfo) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-lg mb-4">Contact information not found</p>
+                    <Button onClick={() => router.push('/checkout/contact')}>
+                        Go to Contact Form
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    if (cart.length === 0) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-lg mb-4">Your cart is empty</p>
+                    <Button onClick={() => router.push('/')}>
+                        Continue Shopping
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
     const discountAmount = appliedDiscount
