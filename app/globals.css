@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
+html{
+  background:#FCFCFC;
+
+}
 body {
-  background: #FCFCFC;
   color: black;
   font-family: var(--font-satoshi), sans-serif;
 }

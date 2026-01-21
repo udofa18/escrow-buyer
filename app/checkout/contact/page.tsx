@@ -54,7 +54,7 @@ export default function CheckoutContactPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className=" ">
             <div className="max-w-2xl mx-auto ">
 
 
@@ -85,7 +85,7 @@ export default function CheckoutContactPage() {
                                 <Text size='small'>why is this needed?</Text>
                                 <FaAngleDown size={15} className='float-right' /></span>
                         </Text>
-                        {showDropdown && (<div className='bg-purple-100 p-4 my-2 text-gray-500 text-sm'>
+                        {showDropdown && (<div className='bg-purple-100 p-4 my-2 text-gray-500 text-sm rounded-[16px]'>
                             <Text size='small'>We require this to ensure your money is safely returned to you if the deal doesn’t go through.</Text>
                         </div>)}
 
@@ -144,7 +144,13 @@ export default function CheckoutContactPage() {
                         )}
                     </div>
 
-                    <div className="flex flex-col-reverse gap-4 ">
+                    <div className="flex flex-col gap-4 ">
+                        <Button variant="primary"
+                        type="submit"
+                            size="lg"
+                            className="w-full">
+                            Continue
+                        </Button>
                         <Button
                             variant="outline"
                             size='lg'
@@ -153,9 +159,7 @@ export default function CheckoutContactPage() {
                         >
                             Back
                         </Button>
-                        <Button size='lg' type="submit" variant="primary" className="flex-1">
-                            Continue
-                        </Button>
+
                     </div>
                 </form>
             </div>

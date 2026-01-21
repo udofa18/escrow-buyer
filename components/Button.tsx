@@ -14,21 +14,22 @@ export default function Button({
   className = '',
   disabled,
   children,
+  type = 'button',
   ...props
 }: ButtonProps) {
-  const baseStyles = 'font-medium rounded-[12px] h-[54px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
+  const baseStyles = 'font-medium rounded-[12px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
   
   const variantStyles = {
-    primary: 'bg-[#5D0C97] h-[54px] text-sm text-white hover:bg-[#4a0a7a] active:bg-[#3d0863]',
+    primary: 'bg-[#5D0C97]  text-sm text-white hover:bg-[#4a0a7a] active:bg-[#3d0863]',
     secondary: 'bg-gray-200 h-[54px] text-gray-900 hover:bg-gray-300 active:bg-gray-400',
     outline: 'border-1 border-[#5D0C97] h-[54px] text-[#5D0C97] hover:bg-[#5D0C97] hover:text-white active:bg-[#4a0a7a]',
     ghost: 'text-[#5D0C97] h-[54px] hover:bg-purple-50 active:bg-purple-100',
   };
   
   const sizeStyles = {
-    sm: 'px-3 py-1.5 text-sm',
+    sm: 'px-3 py-1.5 text-sm h-[33px]',
     md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    lg: 'px-6 py-3 text-[14px] h-[54px] ',
   };
   
   return (
@@ -36,6 +37,7 @@ export default function Button({
       className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       disabled={disabled || isLoading}
       {...props}
+      type={type}
     >
       {isLoading ? (
         <>

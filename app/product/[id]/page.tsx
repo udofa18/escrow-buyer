@@ -71,7 +71,7 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen ">
       <div className="max-w-7xl mx-auto ">
         <div className="flex items-center justify-between mb-6"> 
             <div className='flex items-center gap-2'>
@@ -160,7 +160,7 @@ export default function ProductPage() {
             </Button>
 
             {itemCount > 0 && (
-            <div className="fixed max-w-7xl m-auto h-26 bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-4 animate-slide-up z-50">
+            <div className="fixed max-w-7xl h-[118px] m-auto h-26 bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-4 animate-slide-up z-50">
               <Button
                 variant="primary"
                 size="lg"

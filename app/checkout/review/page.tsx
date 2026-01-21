@@ -15,6 +15,7 @@ import Text from '@/components/Text';
 import { BiDownArrow, BiDownArrowAlt } from 'react-icons/bi';
 import { FaAngleDown } from 'react-icons/fa6';
 import Input from '@/components/Input';
+import LogoOrbitLoader from '@/components/Loader';
 export default function CheckoutReviewPage() {
     const router = useRouter();
     const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
@@ -36,6 +37,8 @@ export default function CheckoutReviewPage() {
 
     const loadContactInfo = () => {
         try {
+            setLoading(true);
+
             // Check if sessionStorage is available (handles SSR and private browsing)
             if (typeof window === 'undefined' || !window.sessionStorage) {
                 console.warn('sessionStorage is not available');
@@ -82,6 +85,8 @@ export default function CheckoutReviewPage() {
     };
 
     const handlePay = async () => {
+        setLoading(true);
+
         if (!contactInfo) {
             alert('Contact information is missing. Please go back and fill in your details.');
             return;
@@ -120,14 +125,14 @@ export default function CheckoutReviewPage() {
             alert(errorMessage || 'Failed to create order. Please try again.');
         } finally {
             setCreatingOrder(false);
+            setLoading(false);
         }
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-lg">Loading...</div>
-            </div>
+            <LogoOrbitLoader showBackground />
+
         );
     }
 
@@ -144,18 +149,7 @@ export default function CheckoutReviewPage() {
         );
     }
 
-    if (cart.length === 0) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-lg mb-4">Your cart is empty</p>
-                    <Button onClick={() => router.push('/')}>
-                        Continue Shopping
-                    </Button>
-                </div>
-            </div>
-        );
-    }
+    
 
     const discountAmount = appliedDiscount
         ? (subtotal * appliedDiscount.discount) / 100
@@ -163,7 +157,7 @@ export default function CheckoutReviewPage() {
     const total = subtotal - discountAmount;
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen ">
             <div className="max-w-4xl mx-auto ">
                
 
@@ -295,7 +289,7 @@ export default function CheckoutReviewPage() {
                         variant="outline"
                         size='lg'
                         onClick={() => router.back()}
-                        className="flex-1"
+                        className=""
                     >
                         Back
                     </Button>
@@ -303,7 +297,7 @@ export default function CheckoutReviewPage() {
                         variant="primary"
                         onClick={handlePay}
                         isLoading={creatingOrder}
-                        className="flex-1"
+                        className=""
                         size="lg"
                     >
                         Pay

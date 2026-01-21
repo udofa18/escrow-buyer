@@ -1,8 +1,11 @@
 'use client';
 
-import { useEffect, useState, useRef, Suspense } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FiCheck, FiLock } from 'react-icons/fi';
+import { MdLock } from 'react-icons/md';
+import Text from '@/components/Text';
+import SuspenseWrapper from '@/components/SuspenseWrapper';
 
 function ProcessingContent() {
     const searchParams = useSearchParams();
@@ -48,12 +51,12 @@ function ProcessingContent() {
     }, [orderId]);
 
     return (
-        <div className="min-h-screen px-4 py-6 ">
-            <h1 className="text-sm font-bold mb-6 border-b border-gray-300 pb-4">Pay via Transfer</h1>
-            <div className=' relative flex flex-col items-center min-h-[calc(100vh-100px)] justify-center  '>
+        <div className=" max-w-7xl h-[calc(100vh-100px)] mx-auto flex flex-col  ">
+            <Text size='medium' as='h1' className="text-sm font-bold  border-b border-gray-300 pb-3 shrink-0">Pay via Transfer</Text>
+            <div className='flex-1 flex flex-col items-center justify-center gap-[48px] max-w-4xl mx-auto w-full  '>
 
 
-                <div className="my-20 w-full mx-auto items-center justify-center flex">
+                <div className="w-full items-center justify-center flex ">
                     {/* Progress Line with Animated Indicator */}
                     <div className="relative w-full max-w-2xl px-4">
                         {/* Horizontal Line */}
@@ -93,39 +96,32 @@ function ProcessingContent() {
                     </div>
                 </div>
 
-                <div className='bg-white flex items-center justify-center'>
+                <div className='w-full flex items-center justify-center'>
                     <div className="text-center max-w-md px-4">
-
-                        <h1 className="text-xl font-bold mb-4">Processing your payment</h1>
-                        <p className="text-gray-600 mb-2">
+                        <Text size='large' as='h1' className="text-xl font-bold mb-3">Processing your payment</Text>
+                        <Text size='small' as='p' className="text-gray-600 mb-2 text-sm">
                             We're verifying your transfer and will redirect you automatically as soon as your funds are secured in Escrow.
-                        </p>
-                        <p className="text-sm text-purple-600 mt-4 font-bold">
+                        </Text>
+                        <Text size='small' as='p' className="text-sm text-purple-600 mt-3 font-bold">
                             Auto-completing in {countdown} seconds (test mode)...
-                        </p>
-
-
+                        </Text>
                     </div>
-
                 </div>
-
-                <div className="text-center text-sm text-gray-500 mt-20 absolute  bottom-0 w-full">
-                    <p className='flex items-center justify-center gap-2 py-2'><FiLock size={20} /> Secured by XedlaPay Escrow</p>
-                </div>
-                </div>
-                
+            
+              
             </div>
+              <div className="text-center text-sm text-gray-500 ">
+                    <Text size='small' as='p' className='flex items-center justify-center gap-2 py-2'><MdLock size={20} /> Secured by VFD</Text>
+        </div>
+           
+        </div>
     );
 }
 
 export default function ProcessingPage() {
     return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="text-lg">Loading...</div>
-            </div>
-        }>
+        <SuspenseWrapper>
             <ProcessingContent />
-        </Suspense>
+        </SuspenseWrapper>
     );
 }

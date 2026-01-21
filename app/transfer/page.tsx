@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FiCopy, FiCheck, FiArrowLeft } from 'react-icons/fi';
 import { paymentApi, orderApi } from '@/lib/api-client';
@@ -11,6 +11,7 @@ import { useCart } from '@/hooks/useCart';
 import { MdLock } from 'react-icons/md';
 import Text from '@/components/Text';
 import Input from '@/components/Input';
+import SuspenseWrapper from '@/components/SuspenseWrapper';
 function TransferContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -177,7 +178,7 @@ function TransferContent() {
     }
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="">
             <div className="max-w-2xl mx-auto ">
                
 
@@ -261,7 +262,7 @@ function TransferContent() {
                         size='lg'
                         onClick={handleCancelPayment}
                         isLoading={cancelling}
-                        className="flex-1"
+                        className=""
                     >
                         Cancel Payment
                     </Button>
@@ -270,14 +271,14 @@ function TransferContent() {
                         size='lg'
                         onClick={handleConfirmPayment}
                         isLoading={confirming}
-                        className="flex-1"
+                        className=""
                     >
                         I have paid
                     </Button>
                 </div>
 
                 <div className="text-center text-sm text-gray-500 mt-20">
-                    <p className='flex items-center justify-center gap-2 py-2'><MdLock size={20} /> Secured by XedlaPay Escrow</p>
+                    <p className='flex items-center justify-center gap-2 py-2'><MdLock size={20} /> Secured by VFD</p>
                     <p>Funds are held securely until your order is delivered.</p>
         </div>
       </div>
@@ -287,12 +288,8 @@ function TransferContent() {
 
 export default function TransferPage() {
     return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="text-lg">Loading...</div>
-            </div>
-        }>
+        <SuspenseWrapper>
             <TransferContent />
-        </Suspense>
+        </SuspenseWrapper>
     );
 }

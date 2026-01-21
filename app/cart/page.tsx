@@ -7,6 +7,7 @@ import Button from '@/components/Button';
 import { useCart } from '@/hooks/useCart';
 import { IoMdClose } from 'react-icons/io';
 import Text from '@/components/Text';
+import LogoOrbitLoader from '@/components/Loader';
 
 export default function CartPage() {
   const router = useRouter();
@@ -25,15 +26,14 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
+        <LogoOrbitLoader showBackground />
+
     );
   }
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen ">
         <div className="max-w-7xl mx-auto ">
           <Button
             variant="ghost"
@@ -57,7 +57,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="overflow-scroll relative">
       <div className="max-w-7xl mx-auto ">
        
         <div className="flex items-center gap-2 mb-6 border-b border-gray-300  justify-between">
@@ -72,7 +72,7 @@ export default function CartPage() {
         </Button>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 pb-32 md:pb-0">
           {/* Cart Items */}
           <div className="md:col-span-2 space-y-4">
             {cart.map((item) => (
@@ -131,7 +131,7 @@ export default function CartPage() {
           </div>
 
           {/* Order Summary */}
-          <div className="md:col-span-1 shadow-gray-800  h-[210px] w-full absolute bottom-0">
+          <div className="md:col-span-1 shadow-gray-800 fixed  h-[210px] w-full md:sticky  bottom-0 left-0 p-4 md:shadow-none shadow-lg">
             <div className="   sticky ">
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">

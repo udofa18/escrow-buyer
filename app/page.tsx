@@ -73,7 +73,7 @@ export default function StoreFront() {
 
 
   return (
-    <div className="min-h-screen bg-white z-10">
+    <div className="min-h-screen z-10">
 
       {/* Header Banner */}
       <div className=" text-black ">
@@ -174,7 +174,7 @@ export default function StoreFront() {
                 {isInCart(product.id) ? (
                   <Button
                     variant="primary"
-                    size="md"
+                    size="lg"
                     className="w-full"
                     onClick={(e) => {
                       e.preventDefault();
@@ -207,7 +207,7 @@ export default function StoreFront() {
           )}
 
           {itemCount > 0 && (
-            <div className="fixed max-w-7xl m-auto bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-[16px] animate-slide-up z-50">
+            <div className="fixed max-w-7xl h-[118px] m-auto bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-[16px] animate-slide-up z-50 shadow-lg md:shadow-none">
               <Button
                 variant="primary"
                 size="lg"

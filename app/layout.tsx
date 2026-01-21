@@ -28,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`antialiased ${satoshi.variable} ${clash.variable} px-[16px] py-[56px] `}>
+    <html lang="en" className="px-[16px] py-[56px]   overflow-scroll">
+      <body className={` ${satoshi.variable} ${clash.variable} `}>
         <GlobalErrorHandler />
         {children}
       </body>
