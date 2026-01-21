@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FiSearch, FiShoppingCart, FiMapPin, FiCheck, FiX } from 'react-icons/fi';
+import { FiSearch, FiShoppingCart, FiMapPin, FiCheck, FiX, FiPlus } from 'react-icons/fi';
 import { productsApi } from '@/lib/api-client';
 import { Product } from '@/types';
 import Button from '@/components/Button';
 import { handleApiError } from '@/lib/error-handler';
 import { useCart } from '@/hooks/useCart';
 import LogoOrbitLoader from "@/components/Loader";
+import Text from '@/components/Text';
 
 export default function StoreFront() {
   const router = useRouter();
@@ -75,7 +76,7 @@ export default function StoreFront() {
     <div className="min-h-screen bg-white z-10">
 
       {/* Header Banner */}
-      <div className=" text-black p-6">
+      <div className=" text-black ">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-2">
             <div className='bg-red-500 w-full h-[120px] absolute z-0 top-0 left-0'>
@@ -83,37 +84,40 @@ export default function StoreFront() {
             </div>
             <Image className=" z-10 border rounded-full mt-10 mb-5" src="/images/nior.png" alt="Noir Essentials" width={100} height={100} />
           </div>
-          <div className="flex items-center gap-4 mb-4">
-            <h1 className="text-2xl font-bold ">Noir Essentials</h1>
+          <div>
+
+          </div>
+          <div className="flex items-center gap-[16px] mb-[8px]">
+            <Text size='large' as='h1' className="font-bold ">Noir Essentials</Text>
             <div className="flex items-center gap-2 ">
               {store?.verified && (
                 <>
-                  <FiCheck className="text-white bg-green-700 rounded-full p-1" size={20} />
-                  <span className="text-sm">Verified store</span>
+                  <FiCheck className="text-white bg-green-800 rounded-full p-1" size={16} />
+                  <Text size='small' className="text-sm">Verified store</Text>
                 </>
               )}
             </div></div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 ">
             <FiMapPin size={16} className='text-black' />
-            <span>{store?.address}</span>
+            <Text size='small' className="text-sm">{store?.address}</Text>
           </div>
         </div>
       </div>
 
       {/* Store Info */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto  py-6">
         <div className="mb-6">
-          <h2 className="text-md font-bold mb-2">Description</h2>
-          <p className="text-gray-700">{store?.description}</p>
+          <Text size='medium' as='h2' className="font-bold mb-2">Description</Text>
+          <Text size='small' >{store?.description}</Text>
         </div>
 
         {/* Products Section */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Products</h2>
+          <Text size='medium' as='h2' className="font-bold">Products</Text>
           <div className="flex items-center gap-4">
             {showSearch ? (
               <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 w-full max-w-md">
-                <FiSearch size={20} className="text-gray-500" />
+                <FiSearch size={16} className="text-gray-300" />
                 <input
                   type="text"
                   placeholder="Search products..."
@@ -136,22 +140,22 @@ export default function StoreFront() {
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Search products"
               >
-                <FiSearch size={24} />
+                <FiSearch size={20}  className='text-gray-400'/>
               </button>
             )}
           </div>
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-30">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[16px] mb-30">
           {filteredProducts.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <p className="text-gray-500">No products found matching "{searchQuery}"</p>
             </div>
           ) : (
             filteredProducts.map((product) => (
-            <div key={product.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div onClick={() => router.push(`/product/${product.id}`)} className="relative w-full aspect-square bg-gray-100">
+            <div key={product.id} className="bg-white  flex flex-col gap-[24px]   rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+              <div onClick={() => router.push(`/product/${product.id}`)} className=" relative w-full aspect-square bg-gray-100 rounded-[16px]">
                 <Image
                   src={product.image}
                   alt={product.name}
@@ -162,11 +166,11 @@ export default function StoreFront() {
                   }}
                 />
               </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-sm mb-2 line-clamp-2">{product.name}</h3>
-                <p className="text-lg  mb-3">
+              <div className="flex flex-col gap-[12px]">
+                <Text size='medium' as='h3' className="font-semibold  mb-2 line-clamp-1">{product.name}</Text>
+                <Text size="medium" className="text-lg  mb-3">
                   ₦ {product.price.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
-                </p>
+                </Text>
                 {isInCart(product.id) ? (
                   <Button
                     variant="primary"
@@ -179,7 +183,7 @@ export default function StoreFront() {
                     }}
                   >
                     <FiCheck size={16} />
-                    Added to cart
+                    <Text size='small' >Added to cart</Text>
                   </Button>
                 ) : (
                   <Button
@@ -193,8 +197,8 @@ export default function StoreFront() {
                     }}
                     isLoading={addingToCart === product.id}
                   >
-                    <span className="text-xl">+</span>
-                    Add to cart
+                    <FiPlus size={16}  />
+                    <Text size='small' >Add to cart</Text>
                   </Button>
                 )}
               </div>
@@ -203,7 +207,7 @@ export default function StoreFront() {
           )}
 
           {itemCount > 0 && (
-            <div className="fixed max-w-7xl m-auto bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-10 animate-slide-up z-50">
+            <div className="fixed max-w-7xl m-auto bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-[16px] animate-slide-up z-50">
               <Button
                 variant="primary"
                 size="lg"

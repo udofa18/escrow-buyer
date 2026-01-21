@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`antialiased ${satoshi.variable} ${clash.variable} `}>
+      <body className={`antialiased ${satoshi.variable} ${clash.variable} px-[16px] py-[56px] `}>
         <GlobalErrorHandler />
         {children}
       </body>

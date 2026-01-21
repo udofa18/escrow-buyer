@@ -9,7 +9,8 @@ import Button from '@/components/Button';
 import { handleApiError } from '@/lib/error-handler';
 import { useCart } from '@/hooks/useCart';
 import { MdLock } from 'react-icons/md';
-
+import Text from '@/components/Text';
+import Input from '@/components/Input';
 function TransferContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -177,26 +178,26 @@ function TransferContent() {
 
     return (
         <div className="min-h-screen bg-white">
-            <div className="max-w-2xl mx-auto px-4 py-6">
+            <div className="max-w-2xl mx-auto ">
                
 
-                <h1 className="text-sm font-bold mb-6 border-b border-gray-300 pb-4">Pay via Transfer</h1>
-                <p className=" mb-6 text-center text-lg  px-10">
-                    Send ₦ {subtotal.toLocaleString('en-NG', { minimumFractionDigits: 2 })} to Xedla Technology Limited          </p>
+                <Text size='medium' className="font-bold mb-6 border-b border-gray-300 pb-4">Pay via Transfer</Text>
+                <Text size='medium' className=" mb-6 text-center  px-10">
+                    Send ₦ {subtotal.toLocaleString('en-NG', { minimumFractionDigits: 2 })} to Xedla Technology Limited          </Text>
                 <div className="bg-gray-100  rounded-lg p-6 mb-6">
 
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">
+                            <Text size='small' as='p' className="block text-[#6E6376] font-medium ">
                                 Bank Name
-                            </label>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="text"
-                                    value={account.accountName}
-                                    readOnly
-                                    className="flex-1 px-4 py-2 focus:outline-none"
+                            </Text>
+                            <div className="flex items-center justify-between gap-2">
+                                <Text
+                                    size='medium'
+                                    as='p'
+                                    className="text-gray-600 flex-1"
+                                    children={account.accountName}
                                 />
                                 <button
                                     onClick={() => handleCopy(account.accountName, 'name')}
@@ -212,15 +213,15 @@ function TransferContent() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">
+                            <Text size='small' as='p' className="block text-[#6E6376] font-medium ">
                                 Account Number
-                            </label>
+                            </Text>
                             <div className="flex items-center gap-2">
-                                <input
-                                    type="text"
-                                    value={account.accountNumber}
-                                    readOnly
-                                    className="flex-1 px-4 py-2  rounded-lg focus:outline-none"
+                                <Text
+                                    size="medium"
+                                    as='p'
+                                    className="flex-1 text-gray-600"
+                                    children={account.accountNumber}
                                 />
                                 <button
                                     onClick={() => handleCopy(account.accountNumber, 'number')}
@@ -236,15 +237,15 @@ function TransferContent() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">
+                            <Text size='small' as='p' className="block text-[#6E6376] font-medium ">
                                 Amount
-                            </label>
+                            </Text>
                             <div className="flex items-center gap-2">
-                                <input
-                                    type="text"
-                                    value={`₦ ${subtotal.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`}
-                                    readOnly
-                                    className="flex-1 px-4 py-2 rounded-lg focus:outline-none"
+                                <Text
+                                    size="medium"
+                                    as='p'
+                                    className="flex-1 text-gray-600"
+                                    children={`₦ ${subtotal.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`}
                                 />
 
                             </div>
@@ -252,11 +253,12 @@ function TransferContent() {
                     </div>
                 </div>
                 <div className=" py-8">
-                    <p className=" text-sm">This account is unique to this transaction and expires in <span className="text-purple-800 font-bold">{formatTime(timeRemaining)}</span></p>
+                    <Text size='small' as='p' className=" text-sm">This account is unique to this transaction and expires in <span className="text-purple-800 font-bold">{formatTime(timeRemaining)}</span></Text>
                 </div>
                 <div className="flex flex-col-reverse gap-4">
                     <Button
                         variant="secondary"
+                        size='lg'
                         onClick={handleCancelPayment}
                         isLoading={cancelling}
                         className="flex-1"
@@ -265,6 +267,7 @@ function TransferContent() {
                     </Button>
                     <Button
                         variant="primary"
+                        size='lg'
                         onClick={handleConfirmPayment}
                         isLoading={confirming}
                         className="flex-1"

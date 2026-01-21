@@ -6,6 +6,7 @@ import { FiTrash2, FiPlus, FiMinus, FiArrowLeft, FiShoppingBag } from 'react-ico
 import Button from '@/components/Button';
 import { useCart } from '@/hooks/useCart';
 import { IoMdClose } from 'react-icons/io';
+import Text from '@/components/Text';
 
 export default function CartPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function CartPage() {
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto ">
           <Button
             variant="ghost"
             onClick={() => router.push('/')}
@@ -44,8 +45,8 @@ export default function CartPage() {
           </Button>
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <FiShoppingBag size={64} className="text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-            <p className="text-gray-600 mb-6">Add some products to get started</p>
+            <Text size='large' className="text-2xl font-bold mb-2">Your cart is empty</Text>
+            <Text size='medium' className="text-gray-600 mb-6">Add some products to get started</Text>
             <Button variant="primary" onClick={() => router.push('/')}>
               Continue Shopping
             </Button>
@@ -56,18 +57,18 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-white relative">
+      <div className="max-w-7xl mx-auto ">
        
         <div className="flex items-center gap-2 mb-6 border-b border-gray-300  justify-between">
        
-        <h1 className="text-sm font-bold  border-gray-300 pb-4"> Cart</h1>
- <Button
+        <Text size='medium' as='h1' className="font-bold  border-gray-300 pb-4"> Cart</Text>
+        <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-6"
+          className=""
         >
-          <IoMdClose size={20} />
+          <IoMdClose size={16} />
         </Button>
         </div>
 
@@ -79,7 +80,7 @@ export default function CartPage() {
                 key={item.product.id}
                 className="bg-white flex gap-4"
               >
-                <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                <div className="relative w-[56px] h-[56px] bg-gray-100 rounded-[8px] overflow-hidden shrink-0">
                   <Image
                     src={item.product.image}
                     alt={item.product.name}
@@ -91,10 +92,10 @@ export default function CartPage() {
                   />
                 </div>
                 <div className="flex-1 flex flex-col justify-between">
-                  <h5 className="font-semibold mb-1 text-sm">{item.product.name}</h5>
-                  <p className="  mb-3">
+                  <Text size='medium' className="font-semibold mb-1">{item.product.name}</Text>
+                  <Text size='medium' className="  mb-3">
                     ₦ {(item.product.price * item.quantity).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
-                  </p>
+                  </Text>
   
                 </div>
                 <div className="flex items-center gap-4">
@@ -123,35 +124,25 @@ export default function CartPage() {
                         <FiPlus size={16} className='border rounded-full ' />
                       </button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        removeFromCart(item.product.id);
-                      }}
-                      disabled={updating === item.product.id || removing === item.product.id}
-                      className="text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <FiTrash2 size={20} />
-                    </button>
+
                   </div>
               </div>
             ))}
           </div>
 
           {/* Order Summary */}
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 shadow-gray-800  h-[210px] w-full absolute bottom-0">
             <div className="   sticky ">
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
-                  <span>Fees </span>
-                  <span>₦ 1000</span>
+                  <Text size='medium'>Fees </Text>
+                  <Text size='medium'>₦ 1000</Text>
                 </div>
-                <div className="flex justify-between font-bold text-base pt-4 ">
-                  <span>Order Total</span>
-                  <span className="text-[#5D0C97]">
+                <div className="flex justify-between  text-base pt-4 ">
+                  <Text>Order Total</Text>
+                  <Text  className=" font-bold">
                     ₦ {subtotal.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
-                  </span>
+                  </Text>
                 </div>
               </div>
               <Button

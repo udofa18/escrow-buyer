@@ -16,13 +16,13 @@ export default function Button({
   children,
   ...props
 }: ButtonProps) {
-  const baseStyles = 'font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
+  const baseStyles = 'font-medium rounded-[12px] h-[54px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
   
   const variantStyles = {
-    primary: 'bg-[#5D0C97] text-sm text-white hover:bg-[#4a0a7a] active:bg-[#3d0863]',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 active:bg-gray-400',
-    outline: 'border-2 border-[#5D0C97] text-[#5D0C97] hover:bg-[#5D0C97] hover:text-white active:bg-[#4a0a7a]',
-    ghost: 'text-[#5D0C97] hover:bg-purple-50 active:bg-purple-100',
+    primary: 'bg-[#5D0C97] h-[54px] text-sm text-white hover:bg-[#4a0a7a] active:bg-[#3d0863]',
+    secondary: 'bg-gray-200 h-[54px] text-gray-900 hover:bg-gray-300 active:bg-gray-400',
+    outline: 'border-1 border-[#5D0C97] h-[54px] text-[#5D0C97] hover:bg-[#5D0C97] hover:text-white active:bg-[#4a0a7a]',
+    ghost: 'text-[#5D0C97] h-[54px] hover:bg-purple-50 active:bg-purple-100',
   };
   
   const sizeStyles = {

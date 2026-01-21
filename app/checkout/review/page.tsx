@@ -11,7 +11,10 @@ import { handleApiError } from '@/lib/error-handler';
 import { useCart } from '@/hooks/useCart';
 import { MdEmail, MdOutlineEmail, MdOutlineHouse, MdOutlinePhone, MdPhone } from 'react-icons/md';
 import { RiBankLine } from 'react-icons/ri';
-
+import Text from '@/components/Text';
+import { BiDownArrow, BiDownArrowAlt } from 'react-icons/bi';
+import { FaAngleDown } from 'react-icons/fa6';
+import Input from '@/components/Input';
 export default function CheckoutReviewPage() {
     const router = useRouter();
     const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
@@ -20,7 +23,7 @@ export default function CheckoutReviewPage() {
     const [loading, setLoading] = useState(true);
     const [applyingDiscount, setApplyingDiscount] = useState(false);
     const [creatingOrder, setCreatingOrder] = useState(false);
-
+    const [showDropdown, setShowDropdown] = useState(false);
     // Use the cart hook
     const {
         cart,
@@ -161,10 +164,10 @@ export default function CheckoutReviewPage() {
 
     return (
         <div className="min-h-screen bg-white">
-            <div className="max-w-4xl mx-auto px-4 py-6">
+            <div className="max-w-4xl mx-auto ">
                
 
-                <h1 className="text-sm font-bold mb-6 border-b border-gray-300 pb-4">Review your order</h1>
+                <Text size='medium' className="font-bold mb-6 border-b border-gray-300 pb-4">Review your order</Text>
 
                 <div className="flex flex-col  gap-6">
                     {/* Order Items */}
@@ -174,43 +177,46 @@ export default function CheckoutReviewPage() {
                         {/* Contact Information */}
                         <div className=" ">
                             <div className="space-y-2  text-gray-500">
-                                <p className='font-bold text-black uppercase'>{contactInfo.fullName}</p>
-                                <p className='flex items-center gap-4'><MdOutlineEmail size={20} /> {contactInfo.email}</p>
-                                <p className='flex items-center gap-4'><MdOutlinePhone size={20} /> {contactInfo.phone}</p>
-                                <span className='flex  gap-4'><RiBankLine size={20} />                                 <p className='flex flex-col items-center gap-4'> {contactInfo.accountDetails} <br /> {contactInfo.bankName}</p>
+                                <Text size='medium' className='font-bold text-black uppercase'>{contactInfo.fullName}</Text>
+                                <Text size='medium' className='flex items-center gap-4'><MdOutlineEmail size={20} /> {contactInfo.email}</Text>
+                                <Text size='medium' className='flex items-center gap-4'><MdOutlinePhone size={20} /> {contactInfo.phone}</Text>
+                                <span className='flex  gap-4'><RiBankLine size={20} />                                 <Text size='medium' className='flex flex-col items-center gap-4'> {contactInfo.accountDetails} <br /> {contactInfo.bankName}</Text>
                                 </span>
 
                             </div>
                         </div>
                     </div>
                     <div className="rp-6 border-t border-gray-300 pt-4">
-                        <h2 className="font-bold mb-4 uppercase">Order Summary</h2>
+                        <Text size='medium' className="font-bold mb-4 uppercase">Order Summary</Text>
                         <div className="space-y-4">
                             {cart.map((item) => (
                                 <div key={item.product.id} className="flex gap-4">
 
                                     <div className="flex items-center gap-4 justify-between w-full">
+                                        <div className='flex flex-col gap-2'>
                                         <span className='flex items-center gap-4'>
-                                            <p className="text-sm text-gray-600">{item.quantity} x</p>
 
-                                            <h3 className="">{item.product.name}</h3>
-                                        </span>  <p className="">
+                                            <Text size='medium' className="">{item.product.name}</Text>
+                                        </span>  <Text size='medium' className="text-[#6E6376]">
                                             ₦ {(item.product.price * item.quantity).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
-                                        </p>
+                                        </Text>
+</div>
+                                        <Text size='medium' className="">{item.quantity} </Text>
+
                                     </div>
                                 </div>
                             ))}
                         </div>
                         <div className="flex justify-between font-bold  pt-4 ">
-                            <span>Subtotal</span>
-                            <span className="">
+                            <Text size='medium'>Total</Text>
+                            <Text size='medium' className="text-[#6E6376]">
                                 ₦ {subtotal.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
-                            </span>
+                            </Text>
                         </div>
                     </div>
                     {/* Order Summary */}
                     <div className="md:col-span-1 border-t border-gray-300 pt-4">
-                        <div className=" rounded-lg  sticky top-6 my-8">
+                        <div className=" rounded-lg  sticky top-6 ">
                             <h2 className=" font-bold mb-4 uppercase">Delivery details</h2>
 
                             {/* Discount Code */}
@@ -227,22 +233,29 @@ export default function CheckoutReviewPage() {
                         </div>
                     </div>
                     <div className="md:col-span-1 border-t border-gray-300 pt-4">
-                        <div className=" rounded-lg  sticky top-6 my-8">
-                            <h2 className=" font-bold mb-4 uppercase">Custom note</h2>
+                        <div className=" rounded-lg  sticky top-6 my-2">
+                            <Text size='medium' className=" font-bold mb-4 uppercase">Custom note</Text>
 
-                            <p className='text-gray-500'>{(contactInfo as any).note || 'No custom note provided'}</p>
+                            <Text size='medium' className='text-gray-500'>{(contactInfo as any).note || 'No custom note provided'}</Text>
                         </div></div>
                     <div className="flex flex-col gap-2 my-8 border-t border-gray-300 pt-4">
-                        <p> Have a discount code? </p>
-                        <div className='flex items-center gap-2'>
+                        <span onClick={() => setShowDropdown(!showDropdown)} className='flex items-center gap-2'>
+                        <Text size='medium'> Have a discount code? </Text>
+                        <FaAngleDown size={15} className='float-right' />
+                        </span>
+                        <div className='flex items-center gap-2 mt-2 w-full'>
+                        {showDropdown && (<div className='flex w-full gap-[12px]'>
+
                           {!appliedDiscount ? (
-                           <><input
-                                    type="text"
+                           <><Input
                                     value={discountCode}
-                                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDiscountCode(e.target.value.toUpperCase())}
+                                    name='discountCode'
                                     placeholder="Enter code"
-                                    className="flex-1 px-3 py-2  bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5D0C97]"
-                                    disabled={!!appliedDiscount} /><Button
+                                    className=""
+                                    disabled={!!appliedDiscount} />
+                                    
+                                    <Button
                                         variant="secondary"
                                         size="md"
                                         onClick={handleApplyDiscount}
@@ -271,7 +284,8 @@ export default function CheckoutReviewPage() {
                             )
 
                             }
-                        </div></div>
+                        </div>
+                        )}</div></div>
                   
 
                
@@ -279,6 +293,7 @@ export default function CheckoutReviewPage() {
                 <div className="flex flex-col-reverse gap-4">
                     <Button
                         variant="outline"
+                        size='lg'
                         onClick={() => router.back()}
                         className="flex-1"
                     >

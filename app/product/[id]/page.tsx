@@ -11,6 +11,7 @@ import { handleApiError } from '@/lib/error-handler';
 import { useCart } from '@/hooks/useCart';
 import { RiTruckLine } from "react-icons/ri";
 import LogoOrbitLoader from "@/components/Loader";
+import Text from '@/components/Text';
 export default function ProductPage() {
   const router = useRouter();
   const params = useParams();
@@ -71,12 +72,12 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto ">
         <div className="flex items-center justify-between mb-6"> 
             <div className='flex items-center gap-2'>
 
             <Image className=" z-10 border rounded-full " src="/images/nior.png" alt="Noir Essentials" width={40} height={40} />
-            <p className="font-medium">{product.store.name}</p>
+            <Text size='medium' as='p' className="font-medium">{product.store.name}</Text>
 
             </div>
 
@@ -85,7 +86,7 @@ export default function ProductPage() {
           onClick={() => router.back()}
           className=""
         >
-          Visit store
+          <Text size='medium' >Visit store</Text>
           <FiArrowRight size={20} />
 
         </Button>
@@ -93,9 +94,9 @@ export default function ProductPage() {
         </div>
    
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-8 pb-30">
           {/* Product Image */}
-          <div className="relative w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
+          <div className="relative w-full aspect-square bg-gray-100 rounded-[16px] overflow-hidden">
             <Image
               src={product.image || " "}
               alt={product.name || " "}
@@ -109,30 +110,26 @@ export default function ProductPage() {
 
           {/* Product Info */}
           <div>
-            <h1 className="text-xl font-bold mb-4">{product.name}</h1>
-            <p className="text-xl font-bold text-gray-700  ">
+            <Text size='large' as='h1' className="font-bold mb-4">{product.name}</Text>
+            <Text size='medium' as='p' className="font-bold  ">
               ₦ {product.price.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
-            </p>
+            </Text>
 
             <div className='flex items-center gap-2 py-4'>
             <RiTruckLine className='text-gray-700' size={20} />
-                <p className="text-sm text-gray-700">Same day delivery</p>
+                <Text size='small' as='p' className="">Same day delivery</Text>
             </div>
 
             <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-2">Description</h2>
-              <p className="text-gray-700">{product.description}</p>
+              <Text size='medium' as='h2' className="font-semibold mb-2">Description</Text>
+              <Text size='small' as='p' className="text-gray-700">{product.description}</Text>
             </div>
 
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-2">Store Information</h2>
-              <p className="font-medium">{product.store.name}</p>
-              <p className="text-sm text-gray-600">{product.store.address}</p>
-            </div>
+           
 
             {/* Quantity Selector */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">Quantity</label>
+            <div className="mb-10">
+              <Text size='medium'  className="font-medium mb-2">Quantity</Text>
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -140,7 +137,7 @@ export default function ProductPage() {
                 >
                   -
                 </button>
-                <span className="text-lg font-semibold w-12 text-center">{quantity}</span>
+                <Text size='medium' as='span' className="font-semibold w-12 text-center">{quantity}</Text>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-100"
@@ -154,7 +151,7 @@ export default function ProductPage() {
             <Button
               variant="primary"
               size="lg"
-              className="w-full mb-24"
+              className="w-full "
               onClick={handleAddToCart}
               isLoading={!!addingToCart}
             >
