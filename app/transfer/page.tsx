@@ -12,6 +12,7 @@ import { MdLock } from 'react-icons/md';
 import Text from '@/components/Text';
 import Input from '@/components/Input';
 import SuspenseWrapper from '@/components/SuspenseWrapper';
+import LogoOrbitLoader from '@/components/Loader';
 function TransferContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -163,9 +164,8 @@ function TransferContent() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-lg">Loading...</div>
-            </div>
+            <LogoOrbitLoader showBackground />
+
         );
     }
 
