@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FiShoppingCart, FiArrowRight } from 'react-icons/fi';
 import { Product } from '@/types';
 import Button from '@/components/Button';
@@ -11,7 +12,7 @@ import { useCart } from '@/hooks/useCart';
 import { RiTruckLine } from 'react-icons/ri';
 import LogoOrbitLoader from '@/components/Loader';
 import Text from '@/components/Text';
-import { getProductBySlug } from '@/lib/storefront-api';
+import { getProductBySlug, getProductsByStoreSlug, mapApiProductToProduct } from '@/lib/storefront-api';
 
 export default function ProductPage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function ProductPage() {
   const productSlug = params.id as string;
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [otherProducts, setOtherProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
@@ -31,8 +33,16 @@ export default function ProductPage() {
 
   const loadProduct = async () => {
     try {
-      const productData = await getProductBySlug(storeSlug, productSlug);
+      const [productData, storeProducts] = await Promise.all([
+        getProductBySlug(storeSlug, productSlug),
+        getProductsByStoreSlug(storeSlug).catch(() => []),
+      ]);
       setProduct(productData);
+      const others = storeProducts
+        .map((p) => mapApiProductToProduct(p))
+        .filter((p) => p.id !== productData.id)
+        .slice(0, 8);
+      setOtherProducts(others);
     } catch (error) {
       console.error('Failed to load product:', handleApiError(error));
     } finally {
@@ -162,7 +172,6 @@ export default function ProductPage() {
               <FiShoppingCart size={20} />
               Add to Cart
             </Button>
-
             {itemCount > 0 && (
             <div className="fixed max-w-7xl h-[118px] m-auto bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-4 animate-slide-up z-50">
               <Button
@@ -185,6 +194,44 @@ export default function ProductPage() {
           )}
           </div>
         </div>
+
+        {/* Other products from this store - full width */}
+        {otherProducts.length > 0 && (
+          <section className="mt-16 pt-8 border-t border-gray-200">
+            <Text size="large" as="h2" className="font-semibold mb-4">
+              Other products from this store
+            </Text>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {otherProducts.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/${storeSlug}/${item.slug ?? item.id}`}
+                  className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all block"
+                >
+                  <div className="relative w-full aspect-square bg-gray-100">
+                    <Image
+                      src={item.image || ''}
+                      alt={item.name}
+                      fill
+                      className="object-cover group-hover:scale-[1.02] transition-transform"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '';
+                      }}
+                    />
+                  </div>
+                  <div className="p-3 flex flex-col gap-1 text-left">
+                    <Text size="small" as="p" className="font-medium line-clamp-2 text-gray-900">
+                      {item.name}
+                    </Text>
+                    <Text size="small" as="p" className="text-[#5D0C97] font-semibold">
+                      ₦ {item.price.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                    </Text>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
