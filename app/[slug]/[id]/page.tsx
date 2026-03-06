@@ -95,7 +95,7 @@ export default function ProductPage() {
 
         <Button
           variant="ghost"
-          onClick={() => router.back()}
+          onClick={() => router.push(`/${storeSlug}/`)}
           className=""
         >
           <Text size='medium' >Visit store</Text>
@@ -197,7 +197,7 @@ export default function ProductPage() {
 
         {/* Other products from this store - full width */}
         {otherProducts.length > 0 && (
-          <section className="mt-16 pt-8 border-t border-gray-200">
+          <section className="mt-10 pt-5 mb-20 border-t border-gray-200">
             <Text size="large" as="h2" className="font-semibold mb-4">
               Other products from this store
             </Text>

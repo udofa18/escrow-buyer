@@ -285,7 +285,7 @@ export default function StorefrontBySlugPage() {
             filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white flex flex-col gap-[24px] rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white flex flex-col gap-[24px] rounded-lg overflow-hidden  hover:border-gray-200 hover:shadow-md transition-all   hover:p-2"
               >
                 <div
                   onClick={() => router.push(`/${slug}/${product.slug ?? product.id}`)}
@@ -295,7 +295,7 @@ export default function StorefrontBySlugPage() {
                     src={product.image}
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-cover group-hover:scale-[1.02] transition-transform"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/placeholder-product.jpg';
                     }}
