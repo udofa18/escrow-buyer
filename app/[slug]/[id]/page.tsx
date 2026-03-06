@@ -4,40 +4,34 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { FiShoppingCart, FiArrowRight } from 'react-icons/fi';
-import { productsApi } from '@/lib/api-client';
 import { Product } from '@/types';
 import Button from '@/components/Button';
 import { handleApiError } from '@/lib/error-handler';
 import { useCart } from '@/hooks/useCart';
-import { RiTruckLine } from "react-icons/ri";
-import LogoOrbitLoader from "@/components/Loader";
+import { RiTruckLine } from 'react-icons/ri';
+import LogoOrbitLoader from '@/components/Loader';
 import Text from '@/components/Text';
+import { getProductBySlug } from '@/lib/storefront-api';
+
 export default function ProductPage() {
   const router = useRouter();
   const params = useParams();
-  const productId = params.id as string;
-  
+  const storeSlug = params.slug as string;
+  const productSlug = params.id as string;
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  
-  // Use the cart hook
-  const {
-    addingToCart,
-    itemCount,
-    addToCart,
-    isInCart,
-    subtotal,
 
-  } = useCart();
+  const { addingToCart, itemCount, addToCart, isInCart, subtotal } = useCart();
 
   useEffect(() => {
-    loadProduct();
-  }, [productId]);
+    if (storeSlug && productSlug) loadProduct();
+  }, [storeSlug, productSlug]);
 
   const loadProduct = async () => {
     try {
-      const productData = await productsApi.getById(productId);
+      const productData = await getProductBySlug(storeSlug, productSlug);
       setProduct(productData);
     } catch (error) {
       console.error('Failed to load product:', handleApiError(error));
@@ -49,7 +43,7 @@ export default function ProductPage() {
   const handleAddToCart = async () => {
     if (!product) return;
     try {
-      await addToCart(product.id, quantity);
+      await addToCart(product.id, quantity, product);
     //   router.push('/cart');
     } catch (error) {
       // Error is already handled in the hook
@@ -74,10 +68,18 @@ export default function ProductPage() {
     <div className="min-h-screen ">
       <div className="max-w-7xl mx-auto ">
         <div className="flex items-center justify-between mb-6"> 
-            <div className='flex items-center gap-2'>
+            <div className='flex  items-center gap-2'>
 
-            <Image className=" z-10 border rounded-full " src="/images/nior.png" alt="Noir Essentials" width={40} height={40} />
-            <Text size='medium' as='p' className="font-medium">{product.store.name}</Text>
+            <Image
+              className="z-10 border rounded-full"
+              src={product.storefrontId?.logo?.url}
+              alt={product.storefrontId?.name ?? product.store?.name ?? 'Store'}
+              width={40}
+              height={40}
+            />
+            <Text size="medium" as="p" className="font-medium">
+              {product.storefrontId?.name ?? product.store?.name ?? 'Store'}
+            </Text>
 
             </div>
 
@@ -117,7 +119,9 @@ export default function ProductPage() {
 
             <div className='flex items-center gap-2 py-4'>
             <RiTruckLine className='text-gray-700' size={20} />
-                <Text size='small' as='p' className="">Same day delivery</Text>
+                <Text size="small" as="p" className="">
+                {product.deliveryTimeline?.toString()}
+              </Text>
             </div>
 
             <div className="mb-6">
@@ -160,12 +164,12 @@ export default function ProductPage() {
             </Button>
 
             {itemCount > 0 && (
-            <div className="fixed max-w-7xl h-[118px] m-auto h-26 bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-4 animate-slide-up z-50">
+            <div className="fixed max-w-7xl h-[118px] m-auto bottom-0 left-0 right-0 bg-white text-white text-xs w-full flex items-center justify-center p-4 animate-slide-up z-50">
               <Button
                 variant="primary"
                 size="lg"
                 className="md:w-96 w-full flex justify-between gap-40"
-                onClick={() => router.push('/cart')}
+                onClick={() => router.push(`/${ storeSlug}/cart`)}
               >
                 <span className='w-full flex justify-between'>
                   <div className='flex gap-2 items-center'>

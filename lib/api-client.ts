@@ -1,6 +1,7 @@
 import { Product, CartItem, DiscountCode, Order, ContactInfo, PaymentAccount } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const ESCROW_BASE = process.env.NEXT_PUBLIC_ESCROW_URL || '';
+const LOCAL_API_BASE = ''; // same origin → Next.js /api routes (cart, orders, payment, discount)
 
 class ApiError extends Error {
   constructor(
@@ -13,12 +14,9 @@ class ApiError extends Error {
   }
 }
 
-async function fetchApi<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
+async function fetchFrom<T>(baseUrl: string, endpoint: string, options?: RequestInit): Promise<T> {
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
         ...options?.headers,
@@ -48,79 +46,74 @@ async function fetchApi<T>(
   }
 }
 
-// Products API
+// Products API (escrow) – prefer storefront-api for storefront/product pages
 export const productsApi = {
-  getAll: (): Promise<Product[]> => fetchApi<Product[]>('/products'),
-  getById: (id: string): Promise<Product> => fetchApi<Product>(`/products/${id}`),
+  getAll: (storeSlug: string): Promise<Product[]> =>
+    fetchFrom<Product[]>(ESCROW_BASE, `/v2/storefront/public/products?storeSlug=${encodeURIComponent(storeSlug)}`),
+  getById: (slug: string): Promise<Product> =>
+    fetchFrom<Product>(ESCROW_BASE, `/v2/storefront/public/products/${encodeURIComponent(slug)}`),
 };
 
-// Cart API
+// Cart API – local Next.js /api/cart (no escrow cart API)
 export const cartApi = {
-  get: (): Promise<CartItem[]> => fetchApi<CartItem[]>('/cart'),
-  add: (productId: string, quantity: number = 1): Promise<CartItem[]> => {
-    if (!productId) {
-      throw new Error('Product ID is required');
-    }
-    return fetchApi<CartItem[]>('/cart', {
+  get: (): Promise<CartItem[]> => fetchFrom<CartItem[]>(LOCAL_API_BASE, '/api/cart'),
+  add: (productId: string, quantity: number = 1, product?: Product): Promise<CartItem[]> => {
+    if (!productId) throw new Error('Product ID is required');
+    const body: { productId: string; quantity: number; product?: Product } = { productId, quantity };
+    if (product) body.product = product;
+    return fetchFrom<CartItem[]>(LOCAL_API_BASE, '/api/cart', {
       method: 'POST',
-      body: JSON.stringify({ productId, quantity }),
+      body: JSON.stringify(body),
     });
   },
   update: (productId: string, quantity: number): Promise<CartItem[]> => {
-    if (!productId) {
-      throw new Error('Product ID is required');
-    }
-    return fetchApi<CartItem[]>(`/cart/${productId}`, {
+    if (!productId) throw new Error('Product ID is required');
+    return fetchFrom<CartItem[]>(LOCAL_API_BASE, `/api/cart/${productId}`, {
       method: 'PUT',
       body: JSON.stringify({ quantity }),
     });
   },
   remove: (productId: string): Promise<CartItem[]> => {
-    if (!productId) {
-      throw new Error('Product ID is required');
-    }
-    return fetchApi<CartItem[]>(`/cart/${productId}`, {
-      method: 'DELETE',
-    });
+    if (!productId) throw new Error('Product ID is required');
+    return fetchFrom<CartItem[]>(LOCAL_API_BASE, `/api/cart/${productId}`, { method: 'DELETE' });
   },
-  clear: (): Promise<void> =>
-    fetchApi<void>('/cart', { method: 'DELETE' }),
+  clear: (): Promise<void> => fetchFrom<void>(LOCAL_API_BASE, '/api/cart', { method: 'DELETE' }),
 };
 
-// Discount API
+// Discount API – local Next.js /api/discount
 export const discountApi = {
   validate: (code: string): Promise<DiscountCode> =>
-    fetchApi<DiscountCode>(`/discount/${code}`),
+    fetchFrom<DiscountCode>(LOCAL_API_BASE, `/api/discount/${encodeURIComponent(code)}`),
 };
 
-// Order API
+// Order API – local Next.js /api/orders
 export const orderApi = {
   create: (contactInfo: ContactInfo, discountCode?: string, cartItems?: CartItem[]): Promise<Order> =>
-    fetchApi<Order>('/orders', {
+    fetchFrom<Order>(LOCAL_API_BASE, '/api/orders', {
       method: 'POST',
       body: JSON.stringify({ contactInfo, discountCode, cartItems }),
     }),
-  getById: (id: string): Promise<Order> => fetchApi<Order>(`/orders/${id}`),
+  getById: (id: string): Promise<Order> => fetchFrom<Order>(LOCAL_API_BASE, `/api/orders/${id}`),
   updateStatus: (id: string, status: Order['status']): Promise<Order> =>
-    fetchApi<Order>(`/orders/${id}/status`, {
+    fetchFrom<Order>(LOCAL_API_BASE, `/api/orders/${id}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
     }),
 };
 
-// Payment API
+// Payment API – local Next.js /api/payment
 export const paymentApi = {
   getAccount: (orderId: string): Promise<PaymentAccount> =>
-    fetchApi<PaymentAccount>(`/payment/account/${orderId}`),
+    fetchFrom<PaymentAccount>(LOCAL_API_BASE, `/api/payment/account/${orderId}`),
   confirm: (orderId: string, orderData?: any): Promise<{ success: boolean }> => {
     const body: any = orderData ? { orderData } : {};
-    return fetchApi<{ success: boolean }>(`/payment/confirm/${orderId}`, {
+    return fetchFrom<{ success: boolean }>(LOCAL_API_BASE, `/api/payment/confirm/${orderId}`, {
       method: 'POST',
       body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
     });
   },
   cancel: (orderId: string): Promise<{ success: boolean }> =>
-    fetchApi<{ success: boolean }>(`/payment/cancel/${orderId}`, {
+    fetchFrom<{ success: boolean }>(LOCAL_API_BASE, `/api/payment/cancel/${orderId}`, {
       method: 'POST',
     }),
 };

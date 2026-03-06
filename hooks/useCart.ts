@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { cartApi } from '@/lib/api-client';
-import { CartItem } from '@/types';
+import { CartItem, Product } from '@/types';
 import { handleApiError } from '@/lib/error-handler';
 
 interface UseCartReturn {
@@ -10,18 +10,15 @@ interface UseCartReturn {
   addingToCart: string | null;
   updating: string | null;
   removing: string | null;
-  
   // Computed values
   itemCount: number;
   subtotal: number;
-  
   // Actions
   loadCart: () => Promise<void>;
-  addToCart: (productId: string, quantity?: number) => Promise<void>;
+  addToCart: (productId: string, quantity?: number, product?: Product) => Promise<void>;
   removeFromCart: (productId: string) => Promise<void>;
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
-  
   // Helpers
   isInCart: (productId: string) => boolean;
   getItemQuantity: (productId: string) => number;
@@ -56,10 +53,10 @@ export function useCart(autoLoad: boolean = true): UseCartReturn {
     }
   }, []);
 
-  const addToCart = useCallback(async (productId: string, quantity: number = 1) => {
+  const addToCart = useCallback(async (productId: string, quantity: number = 1, product?: Product) => {
     setAddingToCart(productId);
     try {
-      const updatedCart = await cartApi.add(productId, quantity);
+      const updatedCart = await cartApi.add(productId, quantity, product);
       setCart(updatedCart);
     } catch (error) {
       console.error('Failed to add to cart:', handleApiError(error));

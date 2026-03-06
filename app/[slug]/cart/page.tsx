@@ -8,10 +8,11 @@ import { useCart } from '@/hooks/useCart';
 import { IoMdClose } from 'react-icons/io';
 import Text from '@/components/Text';
 import LogoOrbitLoader from '@/components/Loader';
-
+import { useParams } from 'next/navigation';
 export default function CartPage() {
   const router = useRouter();
-  
+  const params = useParams();
+  const slug = params.slug as string;
   // Use the cart hook
   const {
     cart,
@@ -149,7 +150,7 @@ export default function CartPage() {
                 variant="primary"
                 size="lg"
                 className="w-full"
-                onClick={() => router.push('/checkout/contact')}
+                onClick={() => router.push(    `/${ slug}/checkout/contact`)}
               >
                 Go to Checkout
               </Button>

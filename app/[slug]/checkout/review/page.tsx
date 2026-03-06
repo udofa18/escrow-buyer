@@ -1,35 +1,55 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { useEffect, useState, useMemo } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { FiArrowLeft, FiCheck } from 'react-icons/fi';
-import { orderApi, discountApi } from '@/lib/api-client';
 import { ContactInfo, Order } from '@/types';
+import type { EscrowDiscount } from '@/types';
 import Button from '@/components/Button';
 import { handleApiError } from '@/lib/error-handler';
 import { useCart } from '@/hooks/useCart';
-import { MdEmail, MdOutlineEmail, MdOutlineHouse, MdOutlinePhone, MdPhone } from 'react-icons/md';
+import { MdOutlineEmail, MdOutlinePhone } from 'react-icons/md';
 import { RiBankLine } from 'react-icons/ri';
 import Text from '@/components/Text';
-import { BiDownArrow, BiDownArrowAlt } from 'react-icons/bi';
 import { FaAngleDown } from 'react-icons/fa6';
 import Input from '@/components/Input';
 import LogoOrbitLoader from '@/components/Loader';
+import { getDiscountByCode, postCheckout } from '@/lib/storefront-api';
+
 export default function CheckoutReviewPage() {
     const router = useRouter();
+    const params = useParams();
+    const slug = params.slug as string;
     const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
     const [discountCode, setDiscountCode] = useState('');
-    const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; discount: number } | null>(null);
+    const [appliedDiscount, setAppliedDiscount] = useState<EscrowDiscount | null>(null);
+    const [discountError, setDiscountError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [applyingDiscount, setApplyingDiscount] = useState(false);
     const [creatingOrder, setCreatingOrder] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
-    // Use the cart hook
-    const {
-        cart,
-        subtotal,
-    } = useCart();
+
+    const { cart, subtotal } = useCart();
+
+    const { discountAmount, total } = useMemo(() => {
+        if (!appliedDiscount) {
+            return { discountAmount: 0, total: subtotal };
+        }
+        const d = appliedDiscount;
+        const targetIds = d.targetType === 'product' && d.targetProducts?.length
+            ? new Set(d.targetProducts.map((p) => p._id))
+            : null;
+        const eligibleSubtotal = targetIds
+            ? cart.reduce((sum, item) => (targetIds.has(item.product.id) ? sum + item.product.price * item.quantity : sum), 0)
+            : subtotal;
+        let amount = 0;
+        if (d.type === 'fixed') {
+            amount = Math.min(d.value, eligibleSubtotal);
+        } else {
+            amount = (eligibleSubtotal * d.value) / 100;
+        }
+        return { discountAmount: amount, total: Math.max(0, subtotal - amount) };
+    }, [appliedDiscount, cart, subtotal]);
 
     useEffect(() => {
         loadContactInfo();
@@ -71,61 +91,91 @@ export default function CheckoutReviewPage() {
     };
 
     const handleApplyDiscount = async () => {
-        if (!discountCode.trim()) return;
+        const code = discountCode.trim().toUpperCase();
+        if (!code) return;
         setApplyingDiscount(true);
+        setDiscountError(null);
         try {
-            const discount = await discountApi.validate(discountCode);
-            setAppliedDiscount({ code: discount.code, discount: discount.discount });
+            const discount = await getDiscountByCode(code);
+            if (!discount.isActive || discount.status !== 'active') {
+                setDiscountError('This discount code is no longer active.');
+                setAppliedDiscount(null);
+                return;
+            }
+            const now = new Date();
+            const from = new Date(discount.validFrom);
+            const until = new Date(discount.validUntil);
+            if (now < from) {
+                setDiscountError(`This code is valid from ${from.toLocaleDateString()}.`);
+                setAppliedDiscount(null);
+                return;
+            }
+            if (now > until) {
+                setDiscountError('This discount code has expired.');
+                setAppliedDiscount(null);
+                return;
+            }
+            if (subtotal < (discount.minOrderAmount || 0)) {
+                setDiscountError(`Minimum order amount is ₦ ${(discount.minOrderAmount || 0).toLocaleString('en-NG')}.`);
+                setAppliedDiscount(null);
+                return;
+            }
+            setAppliedDiscount(discount);
         } catch (error) {
-            console.error('Failed to apply discount:', handleApiError(error));
-            alert('Invalid discount code');
+            const msg = handleApiError(error);
+            setDiscountError(msg || 'Invalid discount code');
+            setAppliedDiscount(null);
         } finally {
             setApplyingDiscount(false);
         }
     };
 
     const handlePay = async () => {
-        setLoading(true);
-
         if (!contactInfo) {
             alert('Contact information is missing. Please go back and fill in your details.');
             return;
         }
-        
         if (cart.length === 0) {
             alert('Your cart is empty. Please add items before checkout.');
             router.push('/');
             return;
         }
-        
+        if (!contactInfo.bankCode) {
+            alert('Please go back and select your bank so we can verify your account.');
+            return;
+        }
+
         setCreatingOrder(true);
         try {
-            console.log('Creating order with:', { 
-                contactInfo, 
-                discountCode: appliedDiscount?.code,
-                cartItems: cart.length 
-            });
-            const order = await orderApi.create(contactInfo, appliedDiscount?.code, cart);
-            
-            // Store full order data in sessionStorage as backup (with error handling)
+            const body = {
+                name: contactInfo.fullName,
+                email: contactInfo.email,
+                phoneNumber: contactInfo.phone,
+                address: contactInfo.address || contactInfo.deliveryAddress || '',
+                productsIds: cart.map((item) => ({
+                    productId: item.product.id,
+                    quantity: item.quantity,
+                })),
+                accountNumber: contactInfo.accountDetails.trim(),
+                bankCode: contactInfo.bankCode,
+                ...(appliedDiscount?.code ? { discountCode: appliedDiscount.code } : {}),
+                ...(contactInfo.note ? { note: contactInfo.note } : {}),
+            };
+            const checkoutData = await postCheckout(body);
             try {
                 if (typeof window !== 'undefined' && window.sessionStorage) {
-                    sessionStorage.setItem('orderId', order.id);
-                    sessionStorage.setItem('orderData', JSON.stringify(order));
+                    sessionStorage.setItem('escrowCheckoutData', JSON.stringify(checkoutData));
                 }
-            } catch (storageError) {
-                console.warn('Failed to save order to sessionStorage:', storageError);
-                // Continue anyway - the order was created successfully
+            } catch (e) {
+                console.warn('Failed to save checkout to sessionStorage', e);
             }
-            
-            router.push(`/transfer?orderId=${order.id}`);
+            router.push(`/${ slug}/transfer?escrowId=${encodeURIComponent(checkoutData.escrowId)}`);
         } catch (error) {
             const errorMessage = handleApiError(error);
-            console.error('Failed to create order:', error);
-            alert(errorMessage || 'Failed to create order. Please try again.');
+            console.error('Checkout failed:', error);
+            alert(errorMessage || 'Checkout failed. Please try again.');
         } finally {
             setCreatingOrder(false);
-            setLoading(false);
         }
     };
 
@@ -138,23 +188,19 @@ export default function CheckoutReviewPage() {
 
     if (!contactInfo) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-lg mb-4">Contact information not found</p>
-                    <Button onClick={() => router.push('/checkout/contact')}>
-                        Go to Contact Form
-                    </Button>
-                </div>
+           <div className="min-h-screen ">
+            <div className="max-w-4xl mx-auto ">
+               
+
+                <Text size='medium' className="font-bold mb-6 border-b border-gray-300 pb-4">Contact information not found</Text>
+
+                <Button onClick={() => router.push(`/${ slug}/checkout/contact`)}>
+                    Go to Contact Form
+                </Button>
             </div>
+        </div>
         );
     }
-
-    
-
-    const discountAmount = appliedDiscount
-        ? (subtotal * appliedDiscount.discount) / 100
-        : 0;
-    const total = subtotal - discountAmount;
 
     return (
         <div className="min-h-screen ">
@@ -237,49 +283,68 @@ export default function CheckoutReviewPage() {
                         <Text size='medium'> Have a discount code? </Text>
                         <FaAngleDown size={15} className='float-right' />
                         </span>
-                        <div className='flex items-center gap-2 mt-2 w-full'>
-                        {showDropdown && (<div className='flex w-full gap-[12px]'>
-
-                          {!appliedDiscount ? (
-                           <><Input
-                                    value={discountCode}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDiscountCode(e.target.value.toUpperCase())}
-                                    name='discountCode'
-                                    placeholder="Enter code"
-                                    className=""
-                                    disabled={!!appliedDiscount} />
-                                    
-                                    <Button
-                                        variant="secondary"
-                                        size="md"
-                                        onClick={handleApplyDiscount}
-                                        isLoading={applyingDiscount}
-                                    >
-                                        Apply
-                                    </Button></>
-                            ) : (
-                                <div className='flex items-center gap-2 justify-between w-full'>
-                                    <div className='flex flex-col '>
-                                    <p> {appliedDiscount.discount}% OFF</p>
-                                <p>You've saved <span className='text-green-600'>₦ {discountAmount.toLocaleString('en-NG', { minimumFractionDigits: 2 })}</span>!!</p>
-                               </div> 
-                               <Button
-                                    variant="ghost"
-                                    className='underline font-bold'
-                                    size="sm"
-                                    onClick={() => {
-                                        setAppliedDiscount(null);
-                                        setDiscountCode('');
-                                    }}
-                                >
-                                    Remove
-                                </Button>
+                        <div className="flex flex-col gap-2 mt-2 w-full">
+                            {discountError && (
+                                <p className="text-red-500 text-sm">{discountError}</p>
+                            )}
+                            {showDropdown && (
+                                <div className="flex w-full gap-[12px] flex-wrap">
+                                    {!appliedDiscount ? (
+                                        <>
+                                            <Input
+                                                value={discountCode}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                    setDiscountCode(e.target.value.toUpperCase());
+                                                    setDiscountError(null);
+                                                }}
+                                                name="discountCode"
+                                                placeholder="Enter code"
+                                                className=""
+                                                disabled={!!appliedDiscount}
+                                            />
+                                            <Button
+                                                variant="secondary"
+                                                size="md"
+                                                onClick={handleApplyDiscount}
+                                                isLoading={applyingDiscount}
+                                            >
+                                                Apply
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <div className="flex items-center gap-2 justify-between w-full">
+                                            <div className="flex flex-col">
+                                                <p className="font-medium">
+                                                    {appliedDiscount.type === 'fixed'
+                                                        ? `₦ ${appliedDiscount.value.toLocaleString('en-NG')} off`
+                                                        : `${appliedDiscount.value}% off`}{' '}
+                                                    ({appliedDiscount.code})
+                                                </p>
+                                                <p>
+                                                    You've saved{' '}
+                                                    <span className="text-green-600 font-medium">
+                                                        ₦ {discountAmount.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                className="underline font-bold"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setAppliedDiscount(null);
+                                                    setDiscountCode('');
+                                                    setDiscountError(null);
+                                                }}
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
-                            )
-
-                            }
+                            )}
                         </div>
-                        )}</div></div>
+                    </div>
                   
 
                
