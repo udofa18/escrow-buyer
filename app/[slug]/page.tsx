@@ -187,7 +187,7 @@ export default function StorefrontBySlugPage() {
                 aria-label="Filter by category"
               >
                 <FiFilter size={16} className="text-gray-400" />
-                <Text size="small">Filter</Text>
+                <Text size="small" className='text-gray-400'>Filter</Text>
               </button>
               {showCategoryFilter && (
                 <>

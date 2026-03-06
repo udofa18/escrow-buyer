@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { FiLock } from 'react-icons/fi';
 import Button from '@/components/Button';
 import { useCart } from '@/hooks/useCart';
@@ -13,7 +13,8 @@ function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId') || '';
   const { cart } = useCart();
-  
+  const params = useParams();
+  const slug = params.slug as string;
   if (!cart) {
     return <div>Order not found</div>;
   }
@@ -41,7 +42,7 @@ function OrderSuccessContent() {
           variant="primary"
           className="mt-6 md:w-96 w-full m-auto"
           size='lg'
-          onClick={() => router.push('/track')}
+          onClick={() => router.push(`/${ slug}/track`)}
         >
           Track my order
         </Button>
