@@ -6,11 +6,13 @@ import { FiCheck, FiLock } from 'react-icons/fi';
 import { MdLock } from 'react-icons/md';
 import Text from '@/components/Text';
 import SuspenseWrapper from '@/components/SuspenseWrapper';
+import { useParams } from 'next/navigation';
 
 function ProcessingContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId') || '';
-
+    const params = useParams();
+    const slug = params.slug as string;
     const [countdown, setCountdown] = useState(10);
     const timerStartedRef = useRef(false);
 
@@ -41,7 +43,7 @@ function ProcessingContent() {
         const redirectTimer = setTimeout(() => {
             clearInterval(countdownInterval);
             console.log('⏰ 10 seconds elapsed! Redirecting to success page...');
-            window.location.href = `/order-success?orderId=${orderId}`;
+            window.location.href = `/${ slug}/order-success?orderId=${orderId}`;
         }, 10000);
 
         return () => {

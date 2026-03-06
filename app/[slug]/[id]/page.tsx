@@ -72,7 +72,7 @@ export default function ProductPage() {
 
             <Image
               className="z-10 border rounded-full"
-              src={product.storefrontId?.logo?.url}
+              src={product.storefrontId?.logo?.url || ''}
               alt={product.storefrontId?.name ?? product.store?.name ?? 'Store'}
               width={40}
               height={40}
