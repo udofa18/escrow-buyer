@@ -18,8 +18,8 @@ const clash = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Noir Essentials - Product Store",
-  description: "Premium products store",
+  title: "Store",
+  description: "Product store",
 };
 
 export default function RootLayout({
