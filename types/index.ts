@@ -159,6 +159,7 @@ export interface CheckoutResponseData {
   discountAmount: number;
   discountCode?: string;
   reference: string;
+  trackingCode?: string;
   escrowId: string;
 }
 
@@ -166,6 +167,55 @@ export interface CheckoutResponse {
   success: boolean;
   message?: string;
   data: CheckoutResponseData;
+}
+
+export interface CheckoutStatusStorefront {
+  _id: string;
+  storeName: string;
+  slug: string;
+  logo?: {
+    fileId?: string;
+    name?: string;
+    url?: string;
+    thumbnailUrl?: string;
+  };
+}
+
+export interface CheckoutStatusProduct {
+  _id: string;
+  name: string;
+  price: number;
+  images?: {
+    fileId?: string;
+    name?: string;
+    url?: string;
+    thumbnailUrl?: string;
+  }[];
+}
+
+export interface CheckoutStatusData {
+  trackingCode: string;
+  status: string;
+  senderPaymentStatus: string;
+  escrowAmount: number;
+  totalAmount: number;
+  discountAmount: number;
+  productName?: string;
+  transactionDescription?: string;
+  storefront?: CheckoutStatusStorefront;
+  products?: CheckoutStatusProduct[];
+  buyerDetails?: {
+    name?: string;
+    email?: string;
+    address?: string;
+  };
+  createdAt?: string;
+}
+
+export interface CheckoutStatusResponse {
+  success: boolean;
+  message?: string;
+  data: CheckoutStatusData;
 }
 
 export interface DiscountCode {

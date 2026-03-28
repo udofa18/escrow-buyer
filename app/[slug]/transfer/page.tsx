@@ -122,8 +122,19 @@ function TransferContent() {
         try {
             if (escrowId) {
                 const stored = sessionStorage.getItem('escrowCheckoutData');
-                const orderData = stored ? JSON.parse(stored) : null;
-                await paymentApi.confirm(escrowId, orderData);
+                const checkoutData = stored ? (JSON.parse(stored) as CheckoutResponseData) : null;
+                const trackingCode = checkoutData?.trackingCode;
+                const reference = checkoutData?.reference;
+                if (!trackingCode || !reference) {
+                    alert('Tracking code/reference is missing. Please restart checkout.');
+                    return;
+                }
+                router.push(
+                    `/${slug}/processing?escrowId=${encodeURIComponent(
+                        escrowId
+                    )}&trackingCode=${encodeURIComponent(trackingCode)}&reference=${encodeURIComponent(reference)}`
+                );
+                return;
             } else {
                 const storedOrderData = sessionStorage.getItem('orderData');
                 let orderData = null;

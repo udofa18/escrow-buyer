@@ -96,7 +96,7 @@ export default function CheckoutReviewPage() {
         setApplyingDiscount(true);
         setDiscountError(null);
         try {
-            const discount = await getDiscountByCode(code);
+            const discount = await getDiscountByCode(code, slug);
             if (!discount.isActive || discount.status !== 'active') {
                 setDiscountError('This discount code is no longer active.');
                 setAppliedDiscount(null);

@@ -2,12 +2,38 @@
 import Button from '@/components/Button'
 import Input from '@/components/Input';
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaAngleDown } from 'react-icons/fa'
 import Text from '@/components/Text';
+import { useSearchParams } from 'next/navigation';
+import type { CheckoutResponseData } from '@/types';
+import { useRouter } from 'next/navigation';
+import SuspenseWrapper from '@/components/SuspenseWrapper';
 
-const TrackOrder = () => {
+function TrackOrderContent() {
+    const searchParams = useSearchParams();
+    const trackingFromUrl = searchParams.get('trackingCode') || '';
     const [showDropdown, setShowDropdown] = useState(false);
+    const [accessKey, setAccessKey] = useState('');
+    const router = useRouter();
+    useEffect(() => {
+        if (trackingFromUrl) {
+            setAccessKey(trackingFromUrl);
+            return;
+        }
+        try {
+            const raw = sessionStorage.getItem('escrowCheckoutData');
+            if (!raw) return;
+            const parsed = JSON.parse(raw) as CheckoutResponseData;
+            if (parsed?.trackingCode) setAccessKey(parsed.trackingCode);
+        } catch {}
+    }, [trackingFromUrl]);
+
+    const handleTrackOrder = () => {
+        if (!accessKey) return;
+        router.push(`/track/${accessKey}`);
+    }
+
     return (
         <div className='h-[calc(100vh-100px)] max-w-7xl m-auto   justify-center items-center relative'>
 <Text size='small' as='p' className='text-right mb-10'>Need Help? </Text>
@@ -16,8 +42,14 @@ const TrackOrder = () => {
                 <Text size='large' as='h1' className='text-2xl clash ' style={{ fontWeight: '500' }}>Track your order live</Text>
                 <Text size='medium' as='p' className='text-gray-500'>Provide your Access Key to track your order status in real-time.</Text>
                 <div className='flex flex-col items-center gap-6 py-10'>
-                    <Input type="text" placeholder='Access key' className='w-full p-2 py-4 rounded-md  bg-gray-100 border-gray-300' />
-                    <Button variant='primary' size='lg' className='w-full'>Track my order</Button>
+                    <Input
+                        type="text"
+                        placeholder='Access key'
+                        className='w-full p-2 py-4 rounded-md  bg-gray-100 border-gray-300'
+                        value={accessKey}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAccessKey(e.target.value)}
+                    />
+                    <Button onClick={handleTrackOrder} variant='primary' size='lg' className='w-full'>Track my order</Button>
                 </div>
                 <div className='flex items-center gap-2 ' onClick={() => setShowDropdown(!showDropdown)} >
                     <Text size='small' as='p' className='text-gray-500'>Need help finding access key? </Text>
@@ -43,4 +75,10 @@ const TrackOrder = () => {
     )
 }
 
-export default TrackOrder
+export default function TrackOrder() {
+    return (
+        <SuspenseWrapper>
+            <TrackOrderContent />
+        </SuspenseWrapper>
+    );
+}

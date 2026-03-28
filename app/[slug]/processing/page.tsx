@@ -7,50 +7,56 @@ import { MdLock } from 'react-icons/md';
 import Text from '@/components/Text';
 import SuspenseWrapper from '@/components/SuspenseWrapper';
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { getCheckoutStatus } from '@/lib/storefront-api';
+import { handleApiError } from '@/lib/error-handler';
 
 function ProcessingContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId') || '';
+    const escrowId = searchParams.get('escrowId') || '';
+    const trackingCode = searchParams.get('trackingCode') || '';
+    const reference = searchParams.get('reference') || '';
     const params = useParams();
     const slug = params.slug as string;
     const [countdown, setCountdown] = useState(10);
     const timerStartedRef = useRef(false);
+    const router = useRouter();
+    const [statusText, setStatusText] = useState<string>('pending');
+    const [errorText, setErrorText] = useState<string | null>(null);
 
     // Client-side countdown and auto-redirect (no server calls)
     useEffect(() => {
-        if (timerStartedRef.current) {
-            return;
-        }
+        if (!trackingCode || !reference) return;
+        let cancelled = false;
+        let interval: number | null = null;
 
-        timerStartedRef.current = true;
-        console.log('🚀 Starting 10-second countdown timer...');
-        
-        // Countdown timer - update every second
-        const countdownInterval = setInterval(() => {
-            setCountdown((prev) => {
-                const newValue = prev - 1;
-                console.log(`⏳ Countdown: ${newValue} seconds remaining`);
-                
-                if (newValue <= 0) {
-                    clearInterval(countdownInterval);
-                    return 0;
+        const tick = async () => {
+            try {
+                const data = await getCheckoutStatus(trackingCode, reference);
+                if (cancelled) return;
+                const sender = (data.senderPaymentStatus || '').toLowerCase();
+                const status = (data.status || '').toLowerCase();
+                setStatusText(sender || status || 'pending');
+                setErrorText(null);
+                if (sender === 'paid') {
+                    router.replace(
+                        `/${slug}/order-success?escrowId=${encodeURIComponent(escrowId)}`
+                    );
                 }
-                return newValue;
-            });
-        }, 1000);
-        
-        // Redirect after 10 seconds
-        const redirectTimer = setTimeout(() => {
-            clearInterval(countdownInterval);
-            console.log('⏰ 10 seconds elapsed! Redirecting to success page...');
-            window.location.href = `/${ slug}/order-success?orderId=${orderId}`;
-        }, 10000);
-
-        return () => {
-            clearTimeout(redirectTimer);
-            clearInterval(countdownInterval);
+            } catch (e) {
+                if (cancelled) return;
+                setErrorText(handleApiError(e) || 'Failed to fetch status');
+            }
         };
-    }, [orderId]);
+
+        tick();
+        interval = window.setInterval(tick, 5000);
+        return () => {
+            cancelled = true;
+            if (interval) window.clearInterval(interval);
+        };
+    }, [trackingCode, reference, router, slug, escrowId]);
 
     return (
         <div className=" max-w-7xl h-[calc(100vh-100px)] mx-auto flex flex-col  ">
@@ -104,9 +110,17 @@ function ProcessingContent() {
                         <Text size='small' as='p' className="text-gray-600 mb-2 text-sm">
                             We're verifying your transfer and will redirect you automatically as soon as your funds are secured in Escrow.
                         </Text>
-                        <Text size='small' as='p' className="text-sm text-purple-600 mt-3 font-bold">
-                            Auto-completing in {countdown} seconds (test mode)...
-                        </Text>
+                        {trackingCode && reference && (
+                            <Text size="small" as="p" className="text-gray-600 mt-3">
+                                Status: <span className="font-medium capitalize">{statusText}</span>
+                            </Text>
+                        )}
+                        {errorText && (
+                            <Text size="small" as="p" className="text-red-600 mt-2">
+                                {errorText}
+                            </Text>
+                        )}
+                       
                     </div>
                 </div>
             

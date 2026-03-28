@@ -8,6 +8,7 @@ import type {
   EscrowDiscount,
   CheckoutRequest,
   CheckoutResponse,
+  CheckoutStatusResponse,
   Bank,
   Storefront,
   ApiProduct,
@@ -108,11 +109,27 @@ export async function postCheckout(body: CheckoutRequest): Promise<CheckoutRespo
   return data.data;
 }
 
-export async function getDiscountByCode(code: string): Promise<EscrowDiscount> {
+export async function getCheckoutStatus(trackingCode: string, reference: string): Promise<CheckoutStatusResponse['data']> {
+  const t = trackingCode.trim();
+  const r = reference.trim();
+  if (!t || !r) throw new Error('Tracking code and reference are required');
+  const data = await fetchEscrow<CheckoutStatusResponse>(
+    '/v2/storefront/public/checkout/status',
+    `trackingCode=${encodeURIComponent(t)}&reference=${encodeURIComponent(r)}`
+  );
+  if (!data.success || !data.data) {
+    throw new Error((data as { message?: string }).message || 'Failed to fetch checkout status');
+  }
+  return data.data;
+}
+
+export async function getDiscountByCode(code: string, storeSlug: string): Promise<EscrowDiscount> {
   const trimmed = code.trim().toUpperCase();
   if (!trimmed) throw new Error('Discount code is required');
+  if (!storeSlug) throw new Error('Store slug is required');
   const data = await fetchEscrow<EscrowDiscountResponse>(
-    `/v2/discount/${encodeURIComponent(trimmed)}`
+    `/v2/discounts/public/code`,
+    `code=${encodeURIComponent(trimmed)}&storeSlug=${encodeURIComponent(storeSlug)}`
   );
   if (!data.success || !data.data) {
     throw new Error((data as { message?: string }).message || 'Invalid discount code');
